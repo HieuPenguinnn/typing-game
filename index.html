@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Chiến Cơ Gõ Phím - Space Typer</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <div class="app-container">
+    <!-- Header -->
+    <header class="app-header">
+      <div class="title-wrap">
+        <h1 class="game-title"><span class="title-neon">CHIẾN CƠ GÕ PHÍM</span></h1>
+      </div>
+    </header>
+
+    <!-- Start & Setup Controls -->
+    <section class="controls-section">
+      <div class="start-controls">
+        <div class="name-field-wrap">
+          <label for="player-name-input" class="field-label">Tên cơ trưởng:</label>
+          <div class="name-input-group">
+            <input
+              type="text"
+              id="player-name-input"
+              class="text-input"
+              maxlength="20"
+              placeholder="Nhập tên của bạn..."
+              autocomplete="off"
+              spellcheck="false"
+            />
+            <button type="button" id="btn-random-name" class="btn btn-secondary" title="Chọn tên ngẫu nhiên">
+              <span class="btn-icon">🎲</span> Tên ngẫu nhiên
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Filter bar above play area -->
+      <div class="filter-bar">
+        <div class="filter-group">
+          <label for="lang-select" class="filter-label">Ngôn ngữ:</label>
+          <select id="lang-select" class="select-input"></select>
+        </div>
+      </div>
+    </section>
+
+    <!-- Main Game Container -->
+    <main class="game-main">
+      <div id="play-field" class="play-field" tabindex="0">
+        <!-- Background stars canvas/layers -->
+        <div class="stars-bg"></div>
+
+        <!-- HUD Bar inside playfield top -->
+        <div id="hud-bar" class="hud-bar">
+          <div class="hud-item hud-lives">
+            <span class="hud-label">Mạng:</span>
+            <div id="hud-hearts" class="hud-hearts">
+              <span class="heart active">♥</span>
+              <span class="heart active">♥</span>
+              <span class="heart active">♥</span>
+            </div>
+          </div>
+
+          <div class="hud-item hud-score-box">
+            <span class="hud-label">Điểm:</span>
+            <span id="hud-score" class="hud-value neon-gold">0</span>
+          </div>
+
+          <div class="hud-item hud-level-box">
+            <span class="hud-label">Cấp độ:</span>
+            <span id="hud-level" class="hud-value neon-cyan">Ván 1</span>
+          </div>
+
+          <div class="hud-item hud-progress-box">
+            <div class="progress-info">
+              <span class="hud-label">Mục tiêu:</span>
+              <span id="hud-progress-text" class="hud-value">0/10</span>
+            </div>
+            <div class="progress-bar-track">
+              <div id="hud-progress-bar" class="progress-bar-fill" style="width: 0%;"></div>
+            </div>
+          </div>
+
+          <div class="hud-item hud-combo-box">
+            <span class="hud-label">Combo:</span>
+            <div class="combo-container">
+              <div id="combo-fire" class="combo-fire" aria-hidden="true">
+                <svg class="combo-fire-svg" viewBox="0 0 100 50" preserveAspectRatio="none">
+                  <defs>
+                    <!-- Tier 1: Small (Red/Amber/Yellow) -->
+                    <linearGradient id="flameGrad1" x1="0%" y1="100%" x2="0%" y2="0%">
+                      <stop offset="0%" stop-color="#cc2200" stop-opacity="0.85" />
+                      <stop offset="50%" stop-color="#ff7700" stop-opacity="0.9" />
+                      <stop offset="100%" stop-color="#ffcc00" stop-opacity="0.95" />
+                    </linearGradient>
+                    <linearGradient id="coreGrad1" x1="0%" y1="100%" x2="0%" y2="0%">
+                      <stop offset="0%" stop-color="#ff8800" />
+                      <stop offset="100%" stop-color="#ffee66" />
+                    </linearGradient>
+
+                    <!-- Tier 2: Medium Orange (Fiery Orange/Gold) -->
+                    <linearGradient id="flameGrad2" x1="0%" y1="100%" x2="0%" y2="0%">
+                      <stop offset="0%" stop-color="#dd1100" stop-opacity="0.9" />
+                      <stop offset="45%" stop-color="#ff5500" stop-opacity="0.9" />
+                      <stop offset="85%" stop-color="#ffaa00" stop-opacity="0.95" />
+                      <stop offset="100%" stop-color="#fff066" stop-opacity="1" />
+                    </linearGradient>
+                    <linearGradient id="coreGrad2" x1="0%" y1="100%" x2="0%" y2="0%">
+                      <stop offset="0%" stop-color="#ff6600" />
+                      <stop offset="60%" stop-color="#ffcc00" />
+                      <stop offset="100%" stop-color="#ffffff" />
+                    </linearGradient>
+
+                    <!-- Tier 3: Big (Intense Crimson/Orange/Gold/White) -->
+                    <linearGradient id="flameGrad3" x1="0%" y1="100%" x2="0%" y2="0%">
+                      <stop offset="0%" stop-color="#d60036" stop-opacity="0.95" />
+                      <stop offset="35%" stop-color="#ff2a00" stop-opacity="0.92" />
+                      <stop offset="75%" stop-color="#ff9900" stop-opacity="0.95" />
+                      <stop offset="100%" stop-color="#ffffff" stop-opacity="1" />
+                    </linearGradient>
+                    <linearGradient id="coreGrad3" x1="0%" y1="100%" x2="0%" y2="0%">
+                      <stop offset="0%" stop-color="#ff1133" />
+                      <stop offset="50%" stop-color="#ffbb00" />
+                      <stop offset="100%" stop-color="#ffffff" />
+                    </linearGradient>
+
+                    <!-- Tier 4: Huge Blue/White-hot Flame (Deep Blue/Neon Cyan/White) -->
+                    <linearGradient id="flameGrad4" x1="0%" y1="100%" x2="0%" y2="0%">
+                      <stop offset="0%" stop-color="#0033cc" stop-opacity="0.95" />
+                      <stop offset="35%" stop-color="#0088ff" stop-opacity="0.92" />
+                      <stop offset="75%" stop-color="#00f0ff" stop-opacity="0.95" />
+                      <stop offset="100%" stop-color="#ffffff" stop-opacity="1" />
+                    </linearGradient>
+                    <linearGradient id="coreGrad4" x1="0%" y1="100%" x2="0%" y2="0%">
+                      <stop offset="0%" stop-color="#0066ff" />
+                      <stop offset="45%" stop-color="#00f0ff" />
+                      <stop offset="100%" stop-color="#ffffff" />
+                    </linearGradient>
+                  </defs>
+
+                  <!-- Background flame aura / heat haze -->
+                  <ellipse class="flame-aura" cx="50" cy="30" rx="42" ry="15" />
+
+                  <!-- Main flame tongues group -->
+                  <g class="flame-group">
+                    <path class="flame-tongue flame-t1" d="M 18,46 C 14,34 20,22 28,15 C 27,26 36,28 38,46 Z" />
+                    <path class="flame-tongue flame-t2" d="M 30,46 C 30,30 38,15 44,5 C 44,18 52,20 54,46 Z" />
+                    <path class="flame-tongue flame-t3" d="M 44,46 C 45,24 50,8 55,2 C 57,14 65,18 66,46 Z" />
+                    <path class="flame-tongue flame-t4" d="M 54,46 C 58,26 68,14 74,7 C 72,21 80,24 80,46 Z" />
+                    <path class="flame-tongue flame-t5" d="M 68,46 C 72,32 80,22 86,14 C 83,27 92,34 88,46 Z" />
+
+                    <!-- Inner core -->
+                    <path class="flame-core" d="M 36,46 C 39,32 46,18 53,12 C 60,18 68,32 70,46 Z" />
+
+                    <!-- Rising embers -->
+                    <circle class="ember ember-1" cx="32" cy="36" r="1.5" />
+                    <circle class="ember ember-2" cx="44" cy="32" r="1.8" />
+                    <circle class="ember ember-3" cx="55" cy="28" r="2.0" />
+                    <circle class="ember ember-4" cx="66" cy="33" r="1.6" />
+                    <circle class="ember ember-5" cx="76" cy="37" r="1.4" />
+                  </g>
+
+                  <!-- Smoke puff group for extinguish -->
+                  <g class="smoke-group">
+                    <circle class="smoke-puff smoke-1" cx="38" cy="30" r="7" />
+                    <circle class="smoke-puff smoke-2" cx="50" cy="24" r="10" />
+                    <circle class="smoke-puff smoke-3" cx="64" cy="28" r="8" />
+                  </g>
+                </svg>
+              </div>
+              <span id="hud-combo" class="hud-value">0</span>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Danger Line -->
+        <div id="danger-line" class="danger-line">
+          <span class="danger-text">VÙNG NGUY HIỂM</span>
+        </div>
+
+        <!-- Words container -->
+        <div id="words-container" class="words-container"></div>
+
+        <!-- SVG Effects layer for Lasers -->
+        <svg id="effects-layer" class="effects-layer"></svg>
+
+        <!-- Spaceship -->
+        <div id="spaceship" class="spaceship">
+          <svg viewBox="0 0 54 54" width="54" height="54" class="ship-svg">
+            <defs>
+              <linearGradient id="shipGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stop-color="#38bdf8" />
+                <stop offset="50%" stop-color="#0284c7" />
+                <stop offset="100%" stop-color="#0f172a" />
+              </linearGradient>
+              <linearGradient id="thrusterGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+                <stop offset="0%" stop-color="#ffff00" />
+                <stop offset="60%" stop-color="#ff4400" />
+                <stop offset="100%" stop-color="#ff0044" />
+              </linearGradient>
+              <filter id="laserGlow">
+                <feGaussianBlur stdDeviation="3" result="blur" />
+                <feMerge>
+                  <feMergeNode in="blur" />
+                  <feMergeNode in="SourceGraphic" />
+                </feMerge>
+              </filter>
+            </defs>
+            <!-- Thruster Flame -->
+            <path class="ship-flame" d="M23 44 Q27 54 31 44 Z" fill="url(#thrusterGrad)" />
+            <!-- Ship Wings & Body -->
+            <polygon points="27,4 39,40 31,35 27,37 23,35 15,40" fill="url(#shipGrad)" stroke="#00f0ff" stroke-width="1.8" />
+            <!-- Cockpit -->
+            <polygon points="27,12 31,25 27,29 23,25" fill="#00f0ff" opacity="0.9" />
+            <!-- Wing Cannon Tips -->
+            <line x1="15" y1="36" x2="15" y2="24" stroke="#ff3366" stroke-width="2.2" stroke-linecap="round" />
+            <line x1="39" y1="36" x2="39" y2="24" stroke="#ff3366" stroke-width="2.2" stroke-linecap="round" />
+          </svg>
+        </div>
+
+        <!-- Overlays -->
+        <!-- 1. Start / Idle Overlay -->
+        <div id="overlay-idle" class="game-overlay active">
+          <div class="overlay-card idle-card">
+            <div class="overlay-badge">SẴN SÀNG XUẤT KÍCH</div>
+            <h2>PHÒNG THỦ KHÔNG GIAN</h2>
+            <p class="overlay-desc">
+              Các thiên thạch từ vựng đang rơi xuống quỹ đạo căn cứ! Gõ chính xác từng ký tự để kích hoạt pháo laser phòng thủ.
+            </p>
+            <div class="overlay-tips">
+              <div class="tip-item"><span class="tip-icon">⚡</span> <strong>Gõ phím chữ:</strong> Tự động khóa và bắn mục tiêu phù hợp</div>
+              <div class="tip-item"><span class="tip-icon">🔁</span> <strong>Phím Space:</strong> Đổi mục tiêu khóa sang từ khác</div>
+              <div class="tip-item"><span class="tip-icon">⚠️</span> <strong>Gõ sai:</strong> Từ sẽ lao nhanh gấp 3 lần về vạch nguy hiểm</div>
+            </div>
+            <button type="button" id="btn-overlay-start" class="btn btn-primary btn-large">
+              Bắt đầu chiến dịch
+            </button>
+          </div>
+        </div>
+
+        <!-- 2. Countdown Overlay -->
+        <div id="overlay-countdown" class="game-overlay">
+          <div class="overlay-card countdown-card">
+            <div class="pilot-badge">CƠ TRƯỞNG XUẤT TRẬN</div>
+            <div id="countdown-player-name" class="pilot-name">PhiHanhGia</div>
+            <div id="countdown-auto-note" class="pilot-auto-note">(Hệ thống tự động cấp tên)</div>
+            <div class="countdown-circle">
+              <span id="countdown-number" class="countdown-digit">3</span>
+            </div>
+            <p class="countdown-subtext">Chuẩn bị bàn phím của bạn...</p>
+          </div>
+        </div>
+
+        <!-- 3. Level Transition Overlay -->
+        <div id="overlay-transition" class="game-overlay">
+          <div class="overlay-card transition-card">
+            <div class="victory-icon">🎖️</div>
+            <h2 id="transition-title">HOÀN THÀNH VÁN 1!</h2>
+            <p class="transition-subtitle">Bảo vệ quỹ đạo thành công</p>
+            <div class="transition-bonus-box">
+              <span class="bonus-label">Thưởng vượt ván:</span>
+              <span id="transition-bonus-val" class="bonus-value neon-gold">+75 điểm</span>
+            </div>
+            <div id="transition-next-msg" class="transition-next-msg">
+              Chuẩn bị tiến vào Ván tiếp theo...
+            </div>
+          </div>
+        </div>
+
+        <!-- 4. Game Over Overlay -->
+        <div id="overlay-gameover" class="game-overlay">
+          <div class="overlay-card gameover-card">
+            <div class="gameover-header">
+              <span class="gameover-tag">KẾT THÚC VÁN ĐẤU</span>
+              <h2>CĂN CỨ BỊ XÂM PHẠM</h2>
+            </div>
+
+            <!-- Rank banner if available -->
+            <div id="gameover-rank-banner" class="rank-banner">
+              Hạng của bạn: #--
+            </div>
+
+            <div class="stats-grid">
+              <div class="stat-card">
+                <span class="stat-label">Tổng điểm</span>
+                <span id="stat-score" class="stat-value neon-gold">0</span>
+              </div>
+              <div class="stat-card">
+                <span class="stat-label">Từ đúng</span>
+                <span id="stat-correct-words" class="stat-value">0</span>
+              </div>
+              <div class="stat-card">
+                <span class="stat-label">Độ chính xác</span>
+                <span id="stat-accuracy" class="stat-value">0%</span>
+              </div>
+              <div class="stat-card">
+                <span class="stat-label">Ký tự đúng</span>
+                <span id="stat-correct-chars" class="stat-value">0</span>
+              </div>
+              <div class="stat-card">
+                <span class="stat-label">Phím gõ sai</span>
+                <span id="stat-wrong-keys" class="stat-value neon-red">0</span>
+              </div>
+              <div class="stat-card">
+                <span class="stat-label">Combo tối đa</span>
+                <span id="stat-max-combo" class="stat-value neon-green">0</span>
+              </div>
+              <div class="stat-card">
+                <span class="stat-label">Tốc độ (WPM)</span>
+                <span id="stat-wpm" class="stat-value">0</span>
+              </div>
+            </div>
+
+            <div class="gameover-actions">
+              <button type="button" id="btn-restart" class="btn btn-primary btn-large">
+                <span class="btn-icon">🔄</span> Chơi lại
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <!-- Leaderboards Section -->
+    <section class="leaderboards-section">
+      <!-- Left Board: Score Ranking -->
+      <div class="board-card board-left">
+        <div class="board-header">
+          <div class="board-title-group">
+            <h2 class="board-title">Xếp hạng điểm</h2>
+            <span id="board-filter-tag" class="board-tag">English</span>
+          </div>
+        </div>
+        <div class="board-table-wrap">
+          <table class="board-table" id="table-scores">
+            <thead>
+              <tr>
+                <th class="th-rank">#</th>
+                <th class="th-name">Người chơi</th>
+                <th class="th-num">Điểm</th>
+                <th class="th-num">WPM</th>
+                <th class="th-num">Từ đúng</th>
+              </tr>
+            </thead>
+            <tbody id="scores-tbody">
+              <tr>
+                <td colspan="5" class="td-empty">Đang tải bảng xếp hạng...</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <div id="board-my-rank" class="my-rank-footer" style="display: none;"></div>
+      </div>
+
+      <!-- Right Board: Plays Ranking -->
+      <div class="board-card board-right">
+        <div class="board-header">
+          <div class="board-title-group">
+            <h2 class="board-title">Xếp hạng các ván đã chơi</h2>
+          </div>
+        </div>
+        <div class="board-table-wrap">
+          <table class="board-table" id="table-plays">
+            <thead>
+              <tr>
+                <th class="th-rank">#</th>
+                <th class="th-name">Người chơi</th>
+                <th class="th-num">Σ Tổng</th>
+                <th class="th-num">24G</th>
+              </tr>
+            </thead>
+            <tbody id="plays-tbody">
+              <tr>
+                <td colspan="4" class="td-empty">Đang tải bảng xếp hạng...</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <!-- Scripts in specified load order -->
+  <script src="js/config.js"></script>
+  <script src="js/words.js"></script>
+  <script src="js/rules.js"></script>
+  <script src="js/names.js"></script>
+  <script src="js/storage.js"></script>
+  <script src="js/leaderboard.js"></script>
+  <script src="js/telex.js"></script>
+  <script src="js/engine.js"></script>
+  <script src="js/ui/app.js"></script>
+</body>
+</html>

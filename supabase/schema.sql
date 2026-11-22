@@ -13,6 +13,9 @@ create table if not exists public.results (
 
 create index if not exists results_created_at_idx on public.results (created_at desc);
 
+revoke all on public.results from anon, authenticated;
+grant select, insert on public.results to anon;
+
 alter table public.results enable row level security;
 
 drop policy if exists "public read" on public.results;

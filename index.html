@@ -21,19 +21,23 @@
     <section class="controls-section">
       <div class="start-controls">
         <div class="name-field-wrap">
-          <label for="player-name-input" class="field-label">Tên cơ trưởng:</label>
+          <label for="player-name-input" class="field-label">Tên cơ trưởng</label>
           <div class="name-input-group">
-            <input
-              type="text"
-              id="player-name-input"
-              class="text-input"
-              maxlength="20"
-              placeholder="Nhập tên của bạn..."
-              autocomplete="off"
-              spellcheck="false"
-            />
-            <button type="button" id="btn-random-name" class="btn btn-secondary" title="Chọn tên ngẫu nhiên">
-              <span class="btn-icon">🎲</span> Tên ngẫu nhiên
+            <div class="input-shell">
+              <svg class="input-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 12a4.5 4.5 0 1 0 0-9 4.5 4.5 0 0 0 0 9Zm0 2c-4.4 0-8 2.2-8 5v1.5h16V19c0-2.8-3.6-5-8-5Z"/></svg>
+              <input
+                type="text"
+                id="player-name-input"
+                class="text-input"
+                maxlength="20"
+                placeholder="Nhập tên của bạn..."
+                autocomplete="off"
+                spellcheck="false"
+              />
+              <span id="name-counter" class="input-counter">0/20</span>
+            </div>
+            <button type="button" id="btn-random-name" class="btn btn-secondary btn-random" title="Chọn tên ngẫu nhiên">
+              <span class="btn-icon">🎲</span><span class="btn-random-text">Tên ngẫu nhiên</span>
             </button>
           </div>
         </div>
@@ -41,8 +45,8 @@
 
       <div class="filter-bar">
         <div class="filter-group">
-          <label for="lang-select" class="filter-label">Ngôn ngữ:</label>
-          <select id="lang-select" class="select-input"></select>
+          <span class="filter-label" id="lang-label">Ngôn ngữ</span>
+          <div id="lang-toggle" class="seg-toggle" role="radiogroup" aria-labelledby="lang-label"></div>
         </div>
       </div>
     </section>

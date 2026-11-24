@@ -22,7 +22,8 @@
 
   var nameInput = document.getElementById('player-name-input');
   var btnRandomName = document.getElementById('btn-random-name');
-  var langSelect = document.getElementById('lang-select');
+  var langToggle = document.getElementById('lang-toggle');
+  var nameCounter = document.getElementById('name-counter');
 
   var playField = document.getElementById('play-field');
   var hudHearts = document.getElementById('hud-hearts');
@@ -161,10 +162,18 @@
     }
   }
 
+  function updateNameCounter() {
+    if (nameCounter && nameInput) nameCounter.textContent = nameInput.value.length + '/' + TG.names.MAX_LEN;
+  }
+
   function setControlsDisabled(disabled) {
     if (nameInput) nameInput.disabled = disabled;
     if (btnRandomName) btnRandomName.disabled = disabled;
-    if (langSelect) langSelect.disabled = disabled;
+    if (langToggle) {
+      var langBtns = langToggle.querySelectorAll('.seg-btn');
+      for (var b = 0; b < langBtns.length; b++) langBtns[b].disabled = disabled;
+      langToggle.classList.toggle('is-disabled', disabled);
+    }
     if (btnOverlayStart) btnOverlayStart.disabled = disabled;
   }
 
@@ -582,6 +591,7 @@
 
     if (nameInput) {
       nameInput.value = engine.playerName;
+      updateNameCounter();
     }
 
     setControlsDisabled(true);
@@ -605,24 +615,40 @@
       });
     }
 
-    if (langSelect && TG.LANGUAGES) {
-      langSelect.innerHTML = '';
-      for (var i = 0; i < TG.LANGUAGES.length; i++) {
-        var opt = document.createElement('option');
-        opt.value = TG.LANGUAGES[i].code;
-        opt.textContent = TG.LANGUAGES[i].label;
-        if (TG.LANGUAGES[i].code === currentLanguage) opt.selected = true;
-        langSelect.appendChild(opt);
-      }
-      langSelect.addEventListener('change', function () {
-        currentLanguage = langSelect.value;
-        refreshLeaderboards();
+    if (langToggle && TG.LANGUAGES) {
+      langToggle.innerHTML = '';
+      TG.LANGUAGES.forEach(function (lang) {
+        var btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'seg-btn' + (lang.code === currentLanguage ? ' active' : '');
+        btn.setAttribute('role', 'radio');
+        btn.setAttribute('aria-checked', lang.code === currentLanguage ? 'true' : 'false');
+        btn.setAttribute('data-lang', lang.code);
+        btn.textContent = lang.label;
+        btn.addEventListener('click', function () {
+          if (currentLanguage === lang.code) return;
+          currentLanguage = lang.code;
+          var all = langToggle.querySelectorAll('.seg-btn');
+          for (var k = 0; k < all.length; k++) {
+            var on = all[k] === btn;
+            all[k].classList.toggle('active', on);
+            all[k].setAttribute('aria-checked', on ? 'true' : 'false');
+          }
+          refreshLeaderboards();
+        });
+        langToggle.appendChild(btn);
       });
+    }
+
+    if (nameInput) {
+      nameInput.addEventListener('input', updateNameCounter);
+      updateNameCounter();
     }
 
     if (btnRandomName && nameInput) {
       btnRandomName.addEventListener('click', function () {
         nameInput.value = TG.names.randomName();
+        updateNameCounter();
         if (nameInput.focus) nameInput.focus();
       });
     }

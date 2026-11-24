@@ -12,14 +12,13 @@
       (a.createdAt - b.createdAt);
   }
 
-  // Bảng trái: lọc theo mode + language, mỗi lượt chơi là 1 dòng
   function rankScores(records, filter, limit) {
     filter = filter || {};
     var rows = records.filter(function (r) {
       return (!filter.mode || r.mode === filter.mode) &&
         (!filter.language || r.language === filter.language);
     }).slice().sort(compareScore);
-    // Mỗi tên chỉ 1 dòng: giữ kỷ lục cao nhất (bản ghi đứng đầu sau khi sắp xếp)
+
     var seen = {};
     rows = rows.filter(function (r) {
       if (seen[r.name]) return false;
@@ -35,7 +34,6 @@
     });
   }
 
-  // Bảng phải: không lọc mode, gom theo tên
   function rankPlays(records, now, limit) {
     now = now == null ? Date.now() : now;
     var map = {};
@@ -82,13 +80,13 @@
     };
     return this.adapter.add(record);
   };
-  // Trả về { scores: { rows, myRank, myRow }, plays: { totalPlays, plays24h, rows } }
+
   Leaderboard.prototype.getBoards = function (opts) {
     opts = opts || {};
     var limit = opts.limit || 10;
     return this.adapter.getAll().then(function (records) {
       var all = rankScores(records, { mode: opts.mode, language: opts.language });
-      // Lượt vừa chơi có thể không phải kỷ lục -> đánh dấu dòng của tên đó
+
       var myName = null;
       if (opts.highlightId) {
         for (var j = 0; j < records.length; j++) if (records[j].id === opts.highlightId) { myName = records[j].name; break; }

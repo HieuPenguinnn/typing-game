@@ -1,7 +1,6 @@
 (function (root) {
   var TG = root.TG = root.TG || {};
 
-  // Bảng nguyên âm: [không dấu, huyền, sắc, hỏi, ngã, nặng]
   var VOWELS = {
     'a': 'aàáảãạ', 'aw': 'ăằắẳẵặ', 'aa': 'âầấẩẫậ',
     'e': 'eèéẻẽẹ', 'ee': 'êềếểễệ',
@@ -22,13 +21,10 @@
     return { keys: ch, tone: '' };
   }
 
-  // Trả về các cách gõ Telex hợp lệ cho 1 từ:
-  // [{ keys: 'phowr', progress: [số ký tự hiển thị đã xong sau mỗi phím] }]
-  // Chấp nhận: dấu thanh gõ ngay sau nguyên âm mang dấu, hoặc gõ ở cuối từ; "ươ" gõ "uow" hoặc "uwow".
   function variants(word) {
     word = String(word).normalize('NFC');
     var chars = Array.from(word);
-    var tokens = [];   // { len, options: [keys...], tone }
+    var tokens = [];
     for (var i = 0; i < chars.length; i++) {
       var d = decompose(chars[i]);
       var next = chars[i + 1] ? decompose(chars[i + 1]) : null;
@@ -42,7 +38,6 @@
     var tone = '';
     tokens.forEach(function (t) { if (t.tone) tone = t.tone; });
 
-    // tổ hợp các lựa chọn của từng token
     var combos = [[]];
     tokens.forEach(function (t) {
       var next = [];
@@ -68,7 +63,6 @@
           done += tokens[k].len;
         }
         if (place === 'end') {
-          // từ chỉ xong khi gõ dấu cuối cùng
           progress[progress.length - 1] = done - 1;
           keys += tone;
           progress.push(done);
@@ -79,11 +73,8 @@
     return out;
   }
 
-  // Gợi ý cách gõ (cách thứ nhất), ví dụ phở -> "phowr"
   function hint(word) { return variants(word)[0].keys; }
 
-  // ---------- Bộ dịch Telex tự do (giống Unikey) ----------
-  // Mỗi ký tự = { base, mod, tone }: base là chữ gốc a-z, mod là phím biến đổi ('w','a','e','o','d'), tone là phím dấu.
   var COMPOSE = {};
   Object.keys(CHAR_MAP).forEach(function (ch) { COMPOSE[CHAR_MAP[ch].keys + '|' + CHAR_MAP[ch].tone] = ch; });
   var TONES = { s: 1, f: 1, r: 1, x: 1, j: 1 };
@@ -99,7 +90,6 @@
     return COMPOSE[p.base + p.mod + '|' + p.tone] || null;
   }
 
-  // Chuỗi đang gõ có thể còn trở thành target không (chỉ thiếu dấu, không sai dấu)
   function compatible(cur, target) {
     if (cur.length > target.length) return false;
     for (var i = 0; i < cur.length; i++) {
@@ -113,7 +103,6 @@
 
   function key(cur) { return cur.map(build).join(''); }
 
-  // Các trạng thái có thể sau khi gõ thêm 1 phím (phím chỉ tác động lên ký tự đã gõ trước đó)
   function step(cur, k) {
     var out = [cur.concat([{ base: k, mod: '', tone: '' }])];
     var i, p;
@@ -134,7 +123,7 @@
         var next = cur.slice(); next[i] = { base: p.base, mod: mod, tone: p.tone };
         if (!build(next[i])) continue;
         out.push(next);
-        // "uo" + w -> "ươ"
+
         if (k === 'w' && p.base === 'u' && cur[i + 1] && cur[i + 1].base === 'o' && !cur[i + 1].mod) {
           var both = next.slice(); both[i + 1] = { base: 'o', mod: 'w', tone: cur[i + 1].tone };
           out.push(both);
@@ -144,7 +133,6 @@
     return out;
   }
 
-  // Bộ so khớp cho 1 từ: feed(phím) -> { ok, complete, progress }
   function createMatcher(word) {
     var target = Array.from(String(word).normalize('NFC')).map(parts);
     var targetStr = String(word).normalize('NFC');

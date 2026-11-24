@@ -11,14 +11,13 @@
 </head>
 <body>
   <div class="app-container">
-    <!-- Header -->
+
     <header class="app-header">
       <div class="title-wrap">
         <h1 class="game-title"><span class="title-neon">SPACE TYPER</span></h1>
       </div>
     </header>
 
-    <!-- Start & Setup Controls -->
     <section class="controls-section">
       <div class="start-controls">
         <div class="name-field-wrap">
@@ -40,7 +39,6 @@
         </div>
       </div>
 
-      <!-- Filter bar above play area -->
       <div class="filter-bar">
         <div class="filter-group">
           <label for="lang-select" class="filter-label">Ngôn ngữ:</label>
@@ -49,13 +47,11 @@
       </div>
     </section>
 
-    <!-- Main Game Container -->
     <main class="game-main">
       <div id="play-field" class="play-field" tabindex="0">
-        <!-- Background stars canvas/layers -->
+
         <div class="stars-bg"></div>
 
-        <!-- HUD Bar inside playfield top -->
         <div id="hud-bar" class="hud-bar">
           <div class="hud-item hud-lives">
             <span class="hud-label">Mạng:</span>
@@ -92,7 +88,7 @@
               <div id="combo-fire" class="combo-fire" aria-hidden="true">
                 <svg class="combo-fire-svg" viewBox="0 0 100 50" preserveAspectRatio="none">
                   <defs>
-                    <!-- Tier 1: Small (Red/Amber/Yellow) -->
+
                     <linearGradient id="flameGrad1" x1="0%" y1="100%" x2="0%" y2="0%">
                       <stop offset="0%" stop-color="#cc2200" stop-opacity="0.85" />
                       <stop offset="50%" stop-color="#ff7700" stop-opacity="0.9" />
@@ -103,7 +99,6 @@
                       <stop offset="100%" stop-color="#ffee66" />
                     </linearGradient>
 
-                    <!-- Tier 2: Medium Orange (Fiery Orange/Gold) -->
                     <linearGradient id="flameGrad2" x1="0%" y1="100%" x2="0%" y2="0%">
                       <stop offset="0%" stop-color="#dd1100" stop-opacity="0.9" />
                       <stop offset="45%" stop-color="#ff5500" stop-opacity="0.9" />
@@ -116,7 +111,6 @@
                       <stop offset="100%" stop-color="#ffffff" />
                     </linearGradient>
 
-                    <!-- Tier 3: Big (Intense Crimson/Orange/Gold/White) -->
                     <linearGradient id="flameGrad3" x1="0%" y1="100%" x2="0%" y2="0%">
                       <stop offset="0%" stop-color="#d60036" stop-opacity="0.95" />
                       <stop offset="35%" stop-color="#ff2a00" stop-opacity="0.92" />
@@ -129,7 +123,6 @@
                       <stop offset="100%" stop-color="#ffffff" />
                     </linearGradient>
 
-                    <!-- Tier 4: Huge Blue/White-hot Flame (Deep Blue/Neon Cyan/White) -->
                     <linearGradient id="flameGrad4" x1="0%" y1="100%" x2="0%" y2="0%">
                       <stop offset="0%" stop-color="#0033cc" stop-opacity="0.95" />
                       <stop offset="35%" stop-color="#0088ff" stop-opacity="0.92" />
@@ -143,10 +136,8 @@
                     </linearGradient>
                   </defs>
 
-                  <!-- Background flame aura / heat haze -->
                   <ellipse class="flame-aura" cx="50" cy="30" rx="42" ry="15" />
 
-                  <!-- Main flame tongues group -->
                   <g class="flame-group">
                     <path class="flame-tongue flame-t1" d="M 18,46 C 14,34 20,22 28,15 C 27,26 36,28 38,46 Z" />
                     <path class="flame-tongue flame-t2" d="M 30,46 C 30,30 38,15 44,5 C 44,18 52,20 54,46 Z" />
@@ -154,10 +145,8 @@
                     <path class="flame-tongue flame-t4" d="M 54,46 C 58,26 68,14 74,7 C 72,21 80,24 80,46 Z" />
                     <path class="flame-tongue flame-t5" d="M 68,46 C 72,32 80,22 86,14 C 83,27 92,34 88,46 Z" />
 
-                    <!-- Inner core -->
                     <path class="flame-core" d="M 36,46 C 39,32 46,18 53,12 C 60,18 68,32 70,46 Z" />
 
-                    <!-- Rising embers -->
                     <circle class="ember ember-1" cx="32" cy="36" r="1.5" />
                     <circle class="ember ember-2" cx="44" cy="32" r="1.8" />
                     <circle class="ember ember-3" cx="55" cy="28" r="2.0" />
@@ -165,7 +154,6 @@
                     <circle class="ember ember-5" cx="76" cy="37" r="1.4" />
                   </g>
 
-                  <!-- Smoke puff group for extinguish -->
                   <g class="smoke-group">
                     <circle class="smoke-puff smoke-1" cx="38" cy="30" r="7" />
                     <circle class="smoke-puff smoke-2" cx="50" cy="24" r="10" />
@@ -179,18 +167,14 @@
 
         </div>
 
-        <!-- Danger Line -->
         <div id="danger-line" class="danger-line">
           <span class="danger-text">VÙNG NGUY HIỂM</span>
         </div>
 
-        <!-- Words container -->
         <div id="words-container" class="words-container"></div>
 
-        <!-- SVG Effects layer for Lasers -->
         <svg id="effects-layer" class="effects-layer"></svg>
 
-        <!-- Spaceship -->
         <div id="spaceship" class="spaceship">
           <svg viewBox="0 0 54 54" width="54" height="54" class="ship-svg">
             <defs>
@@ -212,20 +196,18 @@
                 </feMerge>
               </filter>
             </defs>
-            <!-- Thruster Flame -->
+
             <path class="ship-flame" d="M23 44 Q27 54 31 44 Z" fill="url(#thrusterGrad)" />
-            <!-- Ship Wings & Body -->
+
             <polygon points="27,4 39,40 31,35 27,37 23,35 15,40" fill="url(#shipGrad)" stroke="#00f0ff" stroke-width="1.8" />
-            <!-- Cockpit -->
+
             <polygon points="27,12 31,25 27,29 23,25" fill="#00f0ff" opacity="0.9" />
-            <!-- Wing Cannon Tips -->
+
             <line x1="15" y1="36" x2="15" y2="24" stroke="#ff3366" stroke-width="2.2" stroke-linecap="round" />
             <line x1="39" y1="36" x2="39" y2="24" stroke="#ff3366" stroke-width="2.2" stroke-linecap="round" />
           </svg>
         </div>
 
-        <!-- Overlays -->
-        <!-- 1. Start / Idle Overlay -->
         <div id="overlay-idle" class="game-overlay active">
           <div class="overlay-card idle-card">
             <div class="overlay-badge">SẴN SÀNG XUẤT KÍCH</div>
@@ -239,7 +221,6 @@
           </div>
         </div>
 
-        <!-- 2. Countdown Overlay -->
         <div id="overlay-countdown" class="game-overlay">
           <div class="overlay-card countdown-card">
             <div class="pilot-badge">CƠ TRƯỞNG XUẤT TRẬN</div>
@@ -252,7 +233,6 @@
           </div>
         </div>
 
-        <!-- 3. Level Transition Overlay -->
         <div id="overlay-transition" class="game-overlay">
           <div class="overlay-card transition-card">
             <div class="victory-icon">🎖️</div>
@@ -268,7 +248,6 @@
           </div>
         </div>
 
-        <!-- 4. Game Over Overlay -->
         <div id="overlay-gameover" class="game-overlay">
           <div class="overlay-card gameover-card">
             <div class="gameover-header">
@@ -276,7 +255,6 @@
               <h2>CĂN CỨ BỊ XÂM PHẠM</h2>
             </div>
 
-            <!-- Rank banner if available -->
             <div id="gameover-rank-banner" class="rank-banner">
               Hạng của bạn: #--
             </div>
@@ -322,9 +300,8 @@
       </div>
     </main>
 
-    <!-- Leaderboards Section -->
     <section class="leaderboards-section">
-      <!-- Left Board: Score Ranking -->
+
       <div class="board-card board-left">
         <div class="board-header">
           <div class="board-title-group">
@@ -353,7 +330,6 @@
         <div id="board-my-rank" class="my-rank-footer" style="display: none;"></div>
       </div>
 
-      <!-- Right Board: Plays Ranking -->
       <div class="board-card board-right">
         <div class="board-header">
           <div class="board-title-group">
@@ -381,7 +357,6 @@
     </section>
   </div>
 
-  <!-- Scripts in specified load order -->
   <script src="js/config.js"></script>
   <script src="js/words.js"></script>
   <script src="js/rules.js"></script>

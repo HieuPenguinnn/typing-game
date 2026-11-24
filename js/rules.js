@@ -31,7 +31,6 @@
     return 1;
   }
 
-  // combo = số từ đúng liên tiếp TRƯỚC từ này ("đang combo")
   function wordScore(length, combo) {
     return Math.round((10 + 2 * length) * comboMultiplier(combo));
   }
@@ -50,8 +49,6 @@
     return minutes <= 0 ? 0 : Math.round((completedChars / 5 / minutes) * 10) / 10;
   }
 
-  // Tính lại kết quả từ nhật ký ván chơi (giống hệt hàm submit_result trên server).
-  // Trả về { ok, error?, score, levelReached, correctWords, maxCombo, chars }
   function replayLog(log) {
     var tokens = log ? String(log).split(',') : [];
     var level = 1, cfg = getLevelConfig(1), lives = 3, score = 0, combo = 0, maxCombo = 0;

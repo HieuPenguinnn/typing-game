@@ -3,7 +3,6 @@
 
   var TG = root.TG = root.TG || {};
 
-  // Utility: escape HTML to prevent any injection
   function escapeHTML(str) {
     if (str == null) return '';
     return String(str)
@@ -14,7 +13,6 @@
       .replace(/'/g, '&#39;');
   }
 
-  // Utility: medal or rank display
   function formatRank(rank) {
     if (rank === 1) return '🥇';
     if (rank === 2) return '🥈';
@@ -22,7 +20,6 @@
     return String(rank);
   }
 
-  // DOM Elements
   var nameInput = document.getElementById('player-name-input');
   var btnRandomName = document.getElementById('btn-random-name');
   var langSelect = document.getElementById('lang-select');
@@ -73,7 +70,6 @@
   var playsTbody = document.getElementById('plays-tbody');
   var playsSubline = document.getElementById('plays-subline');
 
-  // State
   var lb = new TG.Leaderboard(TG.createAdapter());
   var engine = null;
   var currentLanguage = 'en';
@@ -81,10 +77,6 @@
   var wordElementsMap = new Map();
   var lastCombo = 0;
   var extinguishTimer = null;
-
-  // ==========================================================================
-  // Combo Fire Helpers
-  // ==========================================================================
 
   function getComboTier(combo) {
     if (combo >= 8) return 4;
@@ -169,10 +161,6 @@
     }
   }
 
-  // ==========================================================================
-  // UI Helpers
-  // ==========================================================================
-
   function setControlsDisabled(disabled) {
     if (nameInput) nameInput.disabled = disabled;
     if (btnRandomName) btnRandomName.disabled = disabled;
@@ -201,10 +189,6 @@
     if (boardFilterTag) boardFilterTag.textContent = langLabel;
   }
 
-  // ==========================================================================
-  // Leaderboard Rendering
-  // ==========================================================================
-
   function renderScoresBoard(scoresData) {
     if (!scoresTbody) return;
     if (!scoresData || !scoresData.rows || scoresData.rows.length === 0) {
@@ -229,7 +213,6 @@
     }
     scoresTbody.innerHTML = html;
 
-    // Show "Hạng của bạn: #N" if player is not in top limit
     if (boardMyRank) {
       if (scoresData.myRank && !scoresData.inTop) {
         var myName = scoresData.myRow ? escapeHTML(scoresData.myRow.name) : '';
@@ -287,10 +270,6 @@
     });
   }
 
-  // ==========================================================================
-  // Visual Effects
-  // ==========================================================================
-
   function triggerLaser(from, to) {
     if (!effectsLayer) return;
     var line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
@@ -311,7 +290,6 @@
     var cx = x + width / 2;
     var cy = y + 14;
 
-    // Floating Points
     var floatEl = document.createElement('div');
     floatEl.className = 'floating-score';
     floatEl.style.left = cx + 'px';
@@ -323,7 +301,6 @@
     floatEl.textContent = text;
     playField.appendChild(floatEl);
 
-    // Shockwave Blast Ring
     var blastEl = document.createElement('div');
     blastEl.className = 'blast-wave';
     blastEl.style.left = cx + 'px';
@@ -339,7 +316,7 @@
   function triggerMistakeShake() {
     if (!playField) return;
     playField.classList.remove('field-shake');
-    // Trigger reflow to restart animation
+
     void playField.offsetWidth;
     playField.classList.add('field-shake');
     setTimeout(function () {
@@ -356,10 +333,6 @@
       playField.classList.remove('field-hit');
     }, 320);
   }
-
-  // ==========================================================================
-  // Falling Words Rendering
-  // ==========================================================================
 
   function renderWords(words) {
     if (!wordsContainer) return;
@@ -399,7 +372,7 @@
       } else {
         inner = '<span class="rest-text">' + escapeHTML(w.text) + '</span>';
       }
-      // Tiếng Việt: gợi ý 1 cách gõ Telex (gõ dấu theo thứ tự nào cũng được)
+
       if (w.locked && w.hint && w.hint !== w.text) {
         inner += '<span class="telex-hint">' + escapeHTML(w.hint) + '</span>';
       }
@@ -410,7 +383,6 @@
       }
     }
 
-    // Clean up destroyed words
     wordElementsMap.forEach(function (el, id) {
       if (!activeIds.has(id)) {
         if (el.parentNode) el.parentNode.removeChild(el);
@@ -426,23 +398,16 @@
     wordElementsMap.clear();
   }
 
-  // ==========================================================================
-  // Engine Creation & Event Handlers
-  // ==========================================================================
-
   function handleEngineFrame(state) {
-    // 1. Danger line position
     if (dangerLine) {
       dangerLine.style.top = state.dangerY + 'px';
     }
 
-    // 2. Spaceship position
     if (spaceship) {
       spaceship.style.left = state.ship.x + 'px';
       spaceship.style.top = state.ship.y + 'px';
     }
 
-    // 3. HUD
     if (heartSpans && heartSpans.length >= 3) {
       for (var i = 0; i < 3; i++) {
         var isAlive = state.hearts && state.hearts[i];
@@ -483,7 +448,6 @@
       }
     }
 
-    // 4. Overlays according to state
     if (state.state === 'countdown') {
       showOverlay(overlayCountdown);
       if (countdownNumber) {
@@ -497,7 +461,6 @@
       showOverlay(overlayGameover);
     }
 
-    // 5. Render falling words
     renderWords(state.words || []);
   }
 
@@ -573,7 +536,6 @@
       if (statMaxCombo) statMaxCombo.textContent = res.maxCombo;
       if (statWpm) statWpm.textContent = res.wpm;
 
-      // Refresh leaderboards with recordId to highlight row
       refreshLeaderboards(payload.recordId).then(function (boards) {
         if (gameoverRankBanner) {
           if (boards.scores.myRank) {
@@ -592,7 +554,6 @@
         }
       });
 
-      // Allow changing name / filters when game is over
       setControlsDisabled(false);
       showOverlay(overlayGameover);
     });
@@ -619,7 +580,6 @@
       topOffset: (document.getElementById('hud-bar') || {}).offsetHeight || 0
     });
 
-    // Update input display with resolved player name
     if (nameInput) {
       nameInput.value = engine.playerName;
     }
@@ -631,13 +591,9 @@
 
   function restartGame() {
     resetComboFire();
-    // Chơi lại: dùng tên trong ô nhập (mặc định là tên vừa chơi) + ngôn ngữ đang chọn
+
     startNewGame();
   }
-
-  // ==========================================================================
-  // Initialization & Event Binding
-  // ==========================================================================
 
   function initUI() {
     resetComboFire();
@@ -649,7 +605,6 @@
       });
     }
 
-    // Populate languages
     if (langSelect && TG.LANGUAGES) {
       langSelect.innerHTML = '';
       for (var i = 0; i < TG.LANGUAGES.length; i++) {
@@ -665,7 +620,6 @@
       });
     }
 
-    // Random Name Button
     if (btnRandomName && nameInput) {
       btnRandomName.addEventListener('click', function () {
         nameInput.value = TG.names.randomName();
@@ -673,7 +627,6 @@
       });
     }
 
-    // Play Buttons
     if (btnOverlayStart) {
       btnOverlayStart.addEventListener('click', startNewGame);
     }
@@ -681,7 +634,6 @@
       btnRestart.addEventListener('click', restartGame);
     }
 
-    // Name input Enter key
     if (nameInput) {
       nameInput.addEventListener('keydown', function (e) {
         if (e.key === 'Enter') {
@@ -691,11 +643,9 @@
       });
     }
 
-    // Keydown handling for engine and preventing Space scrolling
     window.addEventListener('keydown', function (e) {
       var isSpace = e.key === ' ' || e.code === 'Space' || e.key === 'Spacebar';
 
-      // Ensure Space never scrolls the page
       if (isSpace) {
         if (document.activeElement !== nameInput) {
           e.preventDefault();
@@ -710,22 +660,18 @@
       }
     });
 
-    // Window resize handler
     window.addEventListener('resize', function () {
       if (engine && playField) {
         engine.resize(playField.clientWidth, playField.clientHeight);
       }
     });
 
-    // Initial leaderboards loading on page load
     refreshLeaderboards();
   }
 
-  // Run when DOM is ready
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', initUI);
   } else {
     initUI();
   }
-
 })(typeof globalThis !== 'undefined' ? globalThis : this);

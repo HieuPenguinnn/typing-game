@@ -19,7 +19,6 @@
     return String(raw == null ? '' : raw).trim().slice(0, MAX_LEN).trim();
   }
 
-  // Trả về { name, generated }: tên rỗng/toàn khoảng trắng -> sinh tên ngẫu nhiên
   function resolveName(raw, rng) {
     var name = sanitizeName(raw);
     if (name) return { name: name, generated: false };

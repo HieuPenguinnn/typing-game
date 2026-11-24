@@ -5,26 +5,26 @@
   var DEFAULTS = {
     width: 800,
     height: 600,
-    topOffset: 0,            // vùng HUD phía trên; từ chỉ hiện/khóa được khi y >= topOffset
-    bottomOffset: 90,        // vùng tàu vũ trụ; từ chạm y >= height - bottomOffset là mất mạng
-    baseFallSeconds: 11,     // thời gian rơi từ đỉnh tới đáy ở Ván 1 (tốc độ gốc)
-    charWidth: 14,           // ước lượng bề rộng 1 ký tự (px) để tránh chồng lấn
+    topOffset: 0,
+    bottomOffset: 90,
+    baseFallSeconds: 11,
+    charWidth: 14,
     wordHeight: 28,
     countdownMs: 3000,
-    levelTransitionMs: 600,  // qua ván: chờ tối thiểu rồi mới nhận Space (tránh lỡ tay bỏ qua màn thưởng)
-    mistakeBoost: 3,         // gõ sai: rơi nhanh gấp 3 ...
-    mistakeBoostMs: 500,     // ... trong 0.5 giây
+    levelTransitionMs: 600,
+    mistakeBoost: 3,
+    mistakeBoostMs: 500,
     stepMs: 16,
     language: 'en',
     playerName: '',
-    leaderboard: null,       // TG.Leaderboard: tự lưu kết quả khi game over
+    leaderboard: null,
     rng: Math.random,
     now: function () { return (typeof performance !== 'undefined' ? performance.now() : Date.now()); },
     clock: function () { return Date.now(); }
   };
 
   var variantCache = {};
-  // Các cách gõ hợp lệ của 1 từ (tiếng Việt: Telex; tiếng Anh: chính từ đó)
+
   function keyVariants(text) {
     if (!variantCache[text]) {
       variantCache[text] = TG.telex ? TG.telex.variants(text) : [{ keys: text, progress: text.split('').map(function (_, i) { return i + 1; }) }];
@@ -52,7 +52,7 @@
   }
 
   Engine.prototype._reset = function () {
-    this.state = 'idle';           // idle | countdown | playing | levelTransition | gameover
+    this.state = 'idle';
     this.level = 1;
     this.levelConfig = rules.getLevelConfig(1);
     this.lives = rules.MAX_LIVES;
@@ -60,9 +60,9 @@
     this.combo = 0;
     this.maxCombo = 0;
     this.correctWords = 0;
-    this.correctChars = 0;        // số phím đúng (tính độ chính xác)
+    this.correctChars = 0;
     this.wrongKeys = 0;
-    this.completedChars = 0;      // ký tự của các từ đã gõ đúng hoàn toàn (tính WPM)
+    this.completedChars = 0;
     this.killedThisLevel = 0;
     this.words = [];
     this.lockedId = null;
@@ -72,11 +72,10 @@
     this.timerMs = 0;
     this.pendingLevelComplete = false;
     this.result = null;
-    this.log = [];                // nhật ký ván chơi để server kiểm tra điểm: số = độ dài từ, m = gõ sai, b = mất tim, L = qua ván
+    this.log = [];
     this.lastTick = null;
   };
 
-  // ---------- events ----------
   Engine.prototype.on = function (type, fn) {
     (this.listeners[type] = this.listeners[type] || []).push(fn);
     return this;
@@ -93,7 +92,6 @@
     }
   };
 
-  // ---------- geometry ----------
   Engine.prototype.resize = function (width, height) {
     this.width = width;
     this.height = height;
@@ -109,7 +107,6 @@
     return text.length * this.opts.charWidth + 16;
   };
 
-  // ---------- lifecycle ----------
   Engine.prototype.start = function () {
     this._stopLoop();
     this._reset();
@@ -120,7 +117,7 @@
     this._startLoop();
     this._emitFrame();
   };
-  // Chơi lại với cùng tên, cùng chế độ
+
   Engine.prototype.restart = function () { this.start(); };
   Engine.prototype.destroy = function () { this._stopLoop(); this.listeners = {}; };
 
@@ -132,7 +129,7 @@
       if (self.state !== 'gameover' && self.state !== 'idle') self._raf = requestAnimationFrame(loop);
     };
     if (typeof requestAnimationFrame !== 'undefined') this._raf = requestAnimationFrame(loop);
-    // Tab ẩn: rAF bị dừng, interval giữ cho game tiếp tục chạy (không tạm dừng)
+
     if (typeof setInterval !== 'undefined') this._interval = setInterval(function () { self.tick(); }, 250);
   };
   Engine.prototype._stopLoop = function () {
@@ -142,7 +139,6 @@
     this._interval = null;
   };
 
-  // Gọi theo thời gian thực; mô phỏng theo bước cố định để bắt kịp khi tab bị ẩn
   Engine.prototype.tick = function (nowMs) {
     var now = nowMs == null ? this.opts.now() : nowMs;
     if (this.lastTick == null) this.lastTick = now;
@@ -169,7 +165,6 @@
       return;
     }
     if (this.state === 'levelTransition') {
-      // không tự sang ván: chờ người chơi nhấn Space (nextLevel)
       if (this.timerMs > 0) this.timerMs -= dt;
       return;
     }
@@ -190,7 +185,7 @@
       this._wordHitBottom(hits[h]);
       if (this.state === 'gameover') return;
     }
-    // Ưu tiên game over: chỉ xét qua ván sau khi đã xử lý chạm đáy
+
     if (this.pendingLevelComplete) this._completeLevel();
   };
 
@@ -225,7 +220,6 @@
     });
   };
 
-  // Bắt đầu ván tiếp theo (Space trên màn qua ván); trả về true nếu đã chuyển
   Engine.prototype.nextLevel = function () {
     if (this.state !== 'levelTransition' || this.timerMs > 0) return false;
     this._beginLevel();
@@ -233,7 +227,6 @@
     return true;
   };
 
-  // ---------- words ----------
   Engine.prototype._pool = function () {
     var list = TG.WORDS[this.language] || TG.WORDS.en;
     var cfg = this.levelConfig;
@@ -323,8 +316,6 @@
     if (wasLocked) this._autoLock('bottom');
   };
 
-  // ---------- input ----------
-  // Trả về { handled, preventDefault } — UI nên gọi e.preventDefault() khi preventDefault = true
   Engine.prototype.handleKey = function (key) {
     var isSpace = key === ' ' || key === 'Spacebar' || key === 'Space';
     if (this.state === 'levelTransition') {
@@ -424,7 +415,6 @@
     this._emitFrame();
   };
 
-  // ---------- game over ----------
   Engine.prototype._gameOver = function () {
     this.state = 'gameover';
     this.lives = Math.max(0, this.lives);
@@ -447,7 +437,6 @@
     }
   };
 
-  // ---------- state ----------
   Engine.prototype.getStats = function () {
     return {
       name: this.playerName,

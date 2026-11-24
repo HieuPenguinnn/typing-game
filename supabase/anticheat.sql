@@ -1,6 +1,3 @@
--- Chống sửa điểm: không cho ghi thẳng vào bảng, mọi kết quả phải qua hàm submit_result.
--- Hàm tính lại điểm từ nhật ký ván chơi; chỉ lưu nếu khớp với số liệu gửi lên.
-
 alter table public.results add column if not exists play_ms bigint;
 alter table public.results add column if not exists log text;
 
@@ -31,7 +28,6 @@ begin
   if p_log is null or char_length(p_log) > 20000 then raise exception 'invalid log'; end if;
   if p_play_ms is null or p_play_ms < 1000 then raise exception 'invalid play time'; end if;
 
-  -- giới hạn tốc độ gửi
   if exists (select 1 from results where name = v_name and created_at > now_ms - 5000) then
     raise exception 'too many submissions';
   end if;

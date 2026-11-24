@@ -76,6 +76,8 @@
       maxCombo: result.maxCombo,
       wpm: result.wpm,
       language: result.language,
+      playMs: result.playMs,
+      log: result.log,
       createdAt: result.createdAt || Date.now()
     };
     return this.adapter.add(record);

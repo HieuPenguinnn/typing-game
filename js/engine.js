@@ -72,6 +72,7 @@
     this.timerMs = 0;
     this.pendingLevelComplete = false;
     this.result = null;
+    this.log = [];                // nhật ký ván chơi để server kiểm tra điểm: số = độ dài từ, m = gõ sai, b = mất tim, L = qua ván
     this.lastTick = null;
   };
 
@@ -212,6 +213,7 @@
     var cleared = this.level;
     var bonus = rules.levelBonus(cleared, this.lives);
     this.score += bonus;
+    this.log.push('L');
     this.words = [];
     this.lockedId = null;
     this.level += 1;
@@ -314,6 +316,7 @@
     this._removeWord(word);
     this.lives -= 1;
     this.combo = 0;
+    this.log.push('b');
     this._emit('lifeLost', { wordId: word.id, text: word.text, lives: this.lives, x: word.x, y: word.y });
     if (this.lives <= 0) { this._gameOver(); return; }
     this._spawnWord();
@@ -347,6 +350,7 @@
       if (!matches.length) {
         this.wrongKeys += 1;
         this.combo = 0;
+        this.log.push('m');
         this._emit('wrongKey', { key: ch, wordId: null });
         return;
       }
@@ -364,6 +368,7 @@
       this.wrongKeys += 1;
       var expected = word.variants[0].keys[word.typedKeys.length];
       this.combo = 0;
+      this.log.push('m');
       word.typed = 0;
       word.typedKeys = '';
       word.matcher.reset();
@@ -381,6 +386,7 @@
     this.correctWords += 1;
     this.completedChars += word.text.length;
     this.killedThisLevel += 1;
+    this.log.push(String(word.text.length));
     this._removeWord(word);
     this._emit('wordDestroyed', {
       wordId: word.id, text: word.text, x: word.x, y: word.y, width: word.width,
@@ -454,6 +460,7 @@
       maxCombo: this.maxCombo,
       wpm: rules.wpm(this.completedChars, this.playMs),
       playMs: Math.round(this.playMs),
+      log: this.log.join(','),
       language: this.language
     };
   };

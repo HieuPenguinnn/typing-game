@@ -46,17 +46,18 @@
   // Bảng xếp hạng chung qua Supabase (REST). Lỗi mạng -> dùng bản lưu cục bộ.
   var COLS = { id: 'id', name: 'name', score: 'score', levelReached: 'level_reached', correctWords: 'correct_words',
     accuracy: 'accuracy', maxCombo: 'max_combo', wpm: 'wpm', language: 'language', createdAt: 'created_at' };
-  function toRow(rec) { var o = {}; for (var k in COLS) o[COLS[k]] = rec[k]; return o; }
   function fromRow(row) { var o = {}; for (var k in COLS) o[k] = row[COLS[k]]; o.createdAt = Number(o.createdAt); return o; }
 
   function SupabaseAdapter(url, anonKey, table) {
     this.endpoint = url.replace(/\/+$/, '') + '/rest/v1/' + (table || 'results');
+    this.rpc = url.replace(/\/+$/, '') + '/rest/v1/rpc/submit_result';
     this.headers = { apikey: anonKey, Authorization: 'Bearer ' + anonKey, 'Content-Type': 'application/json' };
     this.local = new LocalStorageAdapter('tg_space_typing_results_cache_v1');
   }
   SupabaseAdapter.prototype.getAll = function () {
     var self = this;
-    return fetch(this.endpoint + '?select=*&order=created_at.desc&limit=10000', { headers: this.headers })
+    var cols = Object.keys(COLS).map(function (k) { return COLS[k]; }).join(',');
+    return fetch(this.endpoint + '?select=' + cols + '&order=created_at.desc&limit=10000', { headers: this.headers })
       .then(function (r) { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
       .then(function (rows) { return rows.map(fromRow); })
       .catch(function () { return self.local.getAll(); });
@@ -66,8 +67,18 @@
     var h = {}; for (var k in this.headers) h[k] = this.headers[k];
     h.Prefer = 'return=minimal';
     self.local.add(record);
-    return fetch(this.endpoint, { method: 'POST', headers: h, body: JSON.stringify(toRow(record)) })
-      .then(function () { return record; }, function () { return record; });
+    // Server tính lại điểm từ nhật ký (record.log); kết quả không khớp sẽ bị từ chối
+    var body = {
+      p_id: record.id, p_name: record.name, p_language: record.language,
+      p_score: record.score, p_level_reached: record.levelReached, p_correct_words: record.correctWords,
+      p_max_combo: record.maxCombo, p_accuracy: record.accuracy, p_wpm: record.wpm,
+      p_play_ms: record.playMs, p_log: record.log || ''
+    };
+    return fetch(this.rpc, { method: 'POST', headers: h, body: JSON.stringify(body) })
+      .then(function (r) {
+        if (!r.ok && typeof console !== 'undefined') r.text().then(function (t) { console.warn('submit_result rejected:', t); });
+        return record;
+      }, function () { return record; });
   };
 
   // Chọn nơi lưu theo TG.CONFIG (js/config.js)

@@ -50,7 +50,37 @@
     return minutes <= 0 ? 0 : Math.round((completedChars / 5 / minutes) * 10) / 10;
   }
 
+  // Tính lại kết quả từ nhật ký ván chơi (giống hệt hàm submit_result trên server).
+  // Trả về { ok, error?, score, levelReached, correctWords, maxCombo, chars }
+  function replayLog(log) {
+    var tokens = log ? String(log).split(',') : [];
+    var level = 1, cfg = getLevelConfig(1), lives = 3, score = 0, combo = 0, maxCombo = 0;
+    var correct = 0, killed = 0, chars = 0;
+    for (var i = 0; i < tokens.length; i++) {
+      var t = tokens[i];
+      if (lives <= 0) return { ok: false, error: 'event after game over' };
+      if (t === 'm') { combo = 0; continue; }
+      if (t === 'b') { lives -= 1; combo = 0; continue; }
+      if (t === 'L') {
+        if (killed < cfg.target) return { ok: false, error: 'level not cleared' };
+        score += levelBonus(level, lives);
+        level += 1; cfg = getLevelConfig(level); killed = 0;
+        continue;
+      }
+      if (!/^\d{1,2}$/.test(t)) return { ok: false, error: 'bad token' };
+      var len = Number(t);
+      if (killed >= cfg.target) return { ok: false, error: 'word after level cleared' };
+      if (len < cfg.minLen || len > Math.min(cfg.maxLen, 20)) return { ok: false, error: 'bad word length' };
+      score += wordScore(len, combo);
+      combo += 1; if (combo > maxCombo) maxCombo = combo;
+      correct += 1; killed += 1; chars += len;
+    }
+    if (lives !== 0) return { ok: false, error: 'game not over' };
+    return { ok: true, score: score, levelReached: level, correctWords: correct, maxCombo: maxCombo, chars: chars };
+  }
+
   TG.rules = {
+    replayLog: replayLog,
     MAX_LIVES: 3,
     getLevelConfig: getLevelConfig,
     comboMultiplier: comboMultiplier,
